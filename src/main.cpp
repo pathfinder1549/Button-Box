@@ -43,20 +43,17 @@ void setup() {
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-  for (int index=0; index<BUTTON_COUNT; index++) {
-    int currentButtonState = !digitalRead(index + 1);
-    if (currentButtonState != lastButtonState[index]) {
-      buttonBox.setButton(index, currentButtonState);
-      lastButtonState[index] = currentButtonState;
-    }
-  }
 
   if (lastButtonState[1] == 1) {
     digitalWrite(0, 1);
   } else {
     digitalWrite(0, 0);
   }
+
+// updated code starts here
+  readMatrix();
+  readDI();
+  updateButtons();
 }
 
 
@@ -83,6 +80,32 @@ void readMatrix() {
 void readDI() {
   for (int i=0; i<3; i++) {
     inputKeys[i] = !digitalRead(i+18);
+  }
+}
 
+void updateButtons() {
+  // local vars
+  int buttonIndex;
+  int currentButtonState;
+  // update matrix keys
+  for (int i=0; i<colCount; i++) {
+    for (int j=0; j<rowCount; j++) {
+      buttonIndex = (i*rowCount) + j;
+      currentButtonState = matrixKeys[i][j];
+      if (currentButtonState != lastButtonState[buttonIndex]) {
+        buttonBox.setButton(buttonIndex, currentButtonState);
+        lastButtonState[buttonIndex] = currentButtonState;
+      }
+    }
+  }
+
+  // update discrete keys
+  for (int k=0; k<NUM_DI; k++) {
+    buttonIndex = (rowCount * colCount) + k;
+    currentButtonState = inputKeys[k];
+    if (currentButtonState != lastButtonState[buttonIndex]) {
+      buttonBox.setButton(buttonIndex, currentButtonState);
+      lastButtonState[buttonIndex] = currentButtonState;
+    }
   }
 }
